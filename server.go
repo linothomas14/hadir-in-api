@@ -19,6 +19,7 @@ var (
 
 	// 	transactionRepository  repository.TransactionRepository  = repository.NewTransactionRepository(db)
 	// jwtService  service.JWTService  = service.NewJWTService()
+	userService service.UserService = service.NewUserService(userRepository)
 	authService service.AuthService = service.NewAuthService(userRepository)
 	jwtService  service.AuthService = service.NewAuthService(userRepository)
 
@@ -26,7 +27,7 @@ var (
 
 	authController controller.AuthController = controller.NewAuthController(authService)
 
-// 	transactionController  controller.TransactionController  = controller.NewTransactionController(transactionService)
+	userController controller.UserController = controller.NewUserController(userService)
 )
 
 func PingHandler(c *gin.Context) {
@@ -44,8 +45,8 @@ func main() {
 
 	userRoutes := r.Group("users", middleware.AuthorizeJWT(jwtService))
 	{
-		userRoutes.GET("/profile", authController.GetProfile)
-		userRoutes.PUT("/:idUser", PingHandler)
+		userRoutes.GET("/profile", userController.GetProfile)
+		userRoutes.PUT("/:userId", userController.Update)
 	}
 
 	eventRoutes := r.Group("events", middleware.AuthorizeJWT(jwtService))

@@ -11,11 +11,11 @@ import (
 //UserRepository is contract what userRepository can do to db
 type UserRepository interface {
 	InsertUser(user model.User) (model.User, error)
-	UpdateUser(user model.User) model.User
+	UpdateUser(user model.User) (model.User, error)
 	VerifyCredential(email string, password string) interface{}
 	IsDuplicateEmail(email string) model.User
 	FindByEmail(email string) model.User
-	ProfileUser(userID string) model.User
+	GetUser(userID int) (model.User, error)
 }
 
 type userConnection struct {
@@ -36,7 +36,8 @@ func (db *userConnection) InsertUser(user model.User) (model.User, error) {
 	return user, err
 }
 
-func (db *userConnection) UpdateUser(user model.User) model.User {
+func (db *userConnection) UpdateUser(user model.User) (model.User, error) {
+
 	if user.Password != "" {
 		user.Password = hashAndSalt([]byte(user.Password))
 	} else {
@@ -45,8 +46,8 @@ func (db *userConnection) UpdateUser(user model.User) model.User {
 		user.Password = tempUser.Password
 	}
 
-	db.connection.Save(&user)
-	return user
+	err := db.connection.Save(&user).Error
+	return user, err
 }
 
 func (db *userConnection) VerifyCredential(email string, password string) interface{} {
@@ -70,10 +71,10 @@ func (db *userConnection) FindByEmail(email string) model.User {
 	return user
 }
 
-func (db *userConnection) ProfileUser(userID string) model.User {
+func (db *userConnection) GetUser(userId int) (model.User, error) {
 	var user model.User
-	db.connection.Preload("Books").Preload("Books.User").Find(&user, userID)
-	return user
+	err := db.connection.Find(&user, userId).Error
+	return user, err
 }
 
 func hashAndSalt(pwd []byte) string {
