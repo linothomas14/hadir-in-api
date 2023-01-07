@@ -2,7 +2,6 @@ package controller
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/linothomas14/hadir-in-api/helper"
@@ -51,27 +50,13 @@ func (c *userController) GetProfile(ctx *gin.Context) {
 
 func (c *userController) Update(ctx *gin.Context) {
 
-	userIdParamTemp, err := strconv.ParseInt(ctx.Param("userId"), 10, 64)
-	userIdParam := int(userIdParamTemp)
-	if err != nil {
-		response := helper.BuildResponse(err.Error(), helper.EmptyObj{})
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
-		return
-	}
+	var userParam model.User
 
 	userID := GetUserIdFromClaims(ctx)
 
-	if userIdParam != userID {
-		response := helper.BuildResponse("Not Authorize", helper.EmptyObj{})
-		ctx.JSON(http.StatusBadRequest, response)
-		return
-	}
-	var userParam model.User
-
 	userParam.ID = uint32(userID)
-	// var res response.UserResponse
-	err = ctx.ShouldBind(&userParam)
 
+	err := ctx.ShouldBind(&userParam)
 	if err != nil {
 		response := helper.BuildResponse(err.Error(), helper.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)

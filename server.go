@@ -46,7 +46,7 @@ func main() {
 	userRoutes := r.Group("users", middleware.AuthorizeJWT(jwtService))
 	{
 		userRoutes.GET("/profile", userController.GetProfile)
-		userRoutes.PUT("/:userId", userController.Update)
+		userRoutes.PUT("/", userController.Update)
 	}
 
 	eventRoutes := r.Group("events", middleware.AuthorizeJWT(jwtService))

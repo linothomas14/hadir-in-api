@@ -1,10 +1,8 @@
 package repository
 
 import (
-	"log"
-
+	"github.com/linothomas14/hadir-in-api/helper"
 	"github.com/linothomas14/hadir-in-api/model"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -31,22 +29,14 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 
 func (db *userConnection) InsertUser(user model.User) (model.User, error) {
 
-	user.Password = hashAndSalt([]byte(user.Password))
+	user.Password = helper.HashAndSalt([]byte(user.Password))
 	err := db.connection.Save(&user).Error
 	return user, err
 }
 
 func (db *userConnection) UpdateUser(user model.User) (model.User, error) {
 
-	if user.Password != "" {
-		user.Password = hashAndSalt([]byte(user.Password))
-	} else {
-		var tempUser model.User
-		db.connection.Find(&tempUser, user.ID)
-		user.Password = tempUser.Password
-	}
-
-	err := db.connection.Save(&user).Error
+	err := db.connection.Model(&user).Updates(&user).Find(&user).Error
 	return user, err
 }
 
@@ -75,13 +65,4 @@ func (db *userConnection) GetUser(userId int) (model.User, error) {
 	var user model.User
 	err := db.connection.Find(&user, userId).Error
 	return user, err
-}
-
-func hashAndSalt(pwd []byte) string {
-	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
-	if err != nil {
-		log.Println(err)
-		panic("Failed to hash a password")
-	}
-	return string(hash)
 }
