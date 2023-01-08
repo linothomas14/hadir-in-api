@@ -29,12 +29,12 @@ func SetupDatabaseConnection() *gorm.DB {
 
 	// DNS WITHOUT PORT
 	// dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?tls=true", dbUser, dbPass, dbHost, dbName)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(dsn+"&loc=Asia%2FJakarta"), &gorm.Config{})
 	if err != nil {
 		panic("Failed to create a connection to DB")
 	}
 
-	db.Debug().AutoMigrate(&model.User{})
+	db.Debug().AutoMigrate(&model.User{}, &model.Event{})
 
 	fmt.Println("Successfully connected!")
 	return db

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/linothomas14/hadir-in-api/controller"
 	"github.com/linothomas14/hadir-in-api/middleware"
 	"github.com/linothomas14/hadir-in-api/repository"
@@ -15,24 +17,28 @@ import (
 var (
 	db *gorm.DB = config.SetupDatabaseConnection()
 
-	userRepository repository.UserRepository = repository.NewUserRepository(db)
+	userRepository  repository.UserRepository  = repository.NewUserRepository(db)
+	eventRepository repository.EventRepository = repository.NewEventRepository(db)
 
 	// 	transactionRepository  repository.TransactionRepository  = repository.NewTransactionRepository(db)
 	// jwtService  service.JWTService  = service.NewJWTService()
-	userService service.UserService = service.NewUserService(userRepository)
-	authService service.AuthService = service.NewAuthService(userRepository)
-	jwtService  service.AuthService = service.NewAuthService(userRepository)
+	userService  service.UserService  = service.NewUserService(userRepository)
+	authService  service.AuthService  = service.NewAuthService(userRepository)
+	eventService service.EventService = service.NewEventService(eventRepository)
+	jwtService   service.AuthService  = service.NewAuthService(userRepository)
 
 	// 	transactionService  service.TransactionService  = service.NewTransactionService(transactionRepository, productRepository)
 
-	authController controller.AuthController = controller.NewAuthController(authService)
-
-	userController controller.UserController = controller.NewUserController(userService)
+	authController  controller.AuthController  = controller.NewAuthController(authService)
+	userController  controller.UserController  = controller.NewUserController(userService)
+	eventController controller.EventController = controller.NewEventController(eventService)
 )
 
 func PingHandler(c *gin.Context) {
+	t := time.Now()
 	c.JSON(200, gin.H{
-		"msg": "pong",
+		"msg":  "pong",
+		"time": t,
 	})
 }
 
@@ -53,7 +59,7 @@ func main() {
 	{
 		eventRoutes.GET("/", PingHandler) //Get events for spesific user account who login
 		eventRoutes.GET("/:idEvent", PingHandler)
-		eventRoutes.POST("/", PingHandler)
+		eventRoutes.POST("/", eventController.CreateEvent)
 		eventRoutes.PUT("/:idEvent", PingHandler)
 		eventRoutes.DELETE("/:idEvent", PingHandler)
 	}
