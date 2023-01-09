@@ -1,9 +1,7 @@
 package param
 
-import "time"
-
 type CreateEvent struct {
-	Title        string    `json:"time"`
-	Date         time.Time `json:"date"`
-	ExpiredToken time.Time `json:"expired_token"`
+	Title        string `json:"title"`
+	Date         string `json:"date"`
+	ExpiredToken string `json:"expired_token"`
 }

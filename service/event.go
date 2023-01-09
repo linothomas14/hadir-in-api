@@ -1,6 +1,8 @@
 package service
 
 import (
+	"time"
+
 	"github.com/linothomas14/hadir-in-api/helper"
 	"github.com/linothomas14/hadir-in-api/helper/param"
 	"github.com/linothomas14/hadir-in-api/model"
@@ -26,12 +28,29 @@ func (service *eventService) CreateEvent(event param.CreateEvent) (model.Event, 
 
 	token := helper.TokenGenerator()
 
-	eventModel.Title = event.Title
-	eventModel.Date = event.Date
-	eventModel.Token = token
-	eventModel.ExpiredToken = event.ExpiredToken
+	formatTime := "2006-01-02 15:04:05 MST"
 
-	eventModel, err := service.eventRepository.CreateEvent(eventModel)
+	event.Date = event.Date + " WIB"
+	event.ExpiredToken = event.ExpiredToken + " WIB"
+
+	date, err := time.Parse(formatTime, event.Date)
+
+	if err != nil {
+		return model.Event{}, err
+	}
+
+	expired_token, err := time.Parse(formatTime, event.ExpiredToken)
+
+	if err != nil {
+		return model.Event{}, err
+	}
+
+	eventModel.Title = event.Title
+	eventModel.Date = date
+	eventModel.Token = token
+	eventModel.ExpiredToken = expired_token
+
+	eventModel, err = service.eventRepository.CreateEvent(eventModel)
 
 	if err != nil {
 		return model.Event{}, err
