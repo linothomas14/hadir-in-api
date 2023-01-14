@@ -34,7 +34,7 @@ func SetupDatabaseConnection() *gorm.DB {
 		panic("Failed to create a connection to DB")
 	}
 
-	db.Debug().AutoMigrate(&model.User{}, &model.Event{})
+	db.Debug().AutoMigrate(&model.User{}, &model.Event{}, &model.Attendance{})
 
 	fmt.Println("Successfully connected!")
 	return db

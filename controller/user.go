@@ -28,15 +28,15 @@ func NewUserController(userService service.UserService) UserController {
 func (c *userController) GetProfile(ctx *gin.Context) {
 	var user response.UserResponse
 
-	UserID := GetUserIdFromClaims(ctx)
+	userID := GetUserIdFromClaims(ctx)
 
-	if UserID == 0 {
+	if userID == 0 {
 		response := helper.BuildResponse("User id = 0, there is error occur", helper.EmptyObj{})
 		ctx.JSON(http.StatusBadRequest, response)
 		return
 	}
 
-	user, err := c.userService.GetProfile(UserID)
+	user, err := c.userService.GetProfile(userID)
 
 	if err != nil {
 		response := helper.BuildResponse(err.Error(), helper.EmptyObj{})
@@ -90,14 +90,14 @@ func GetUserIdFromClaims(ctx *gin.Context) int {
 		return 0
 	}
 
-	userId, ok := userClaims.(float64)
+	id, ok := userClaims.(float64)
 
 	if !ok {
 		response := helper.BuildResponse("Cant Parsing user_id", helper.EmptyObj{})
 		ctx.JSON(http.StatusBadRequest, response)
 		return 0
 	}
-	UserID := int(userId)
+	userID := int(id)
 
-	return UserID
+	return userID
 }

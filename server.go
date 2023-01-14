@@ -17,21 +17,23 @@ import (
 var (
 	db *gorm.DB = config.SetupDatabaseConnection()
 
-	userRepository  repository.UserRepository  = repository.NewUserRepository(db)
-	eventRepository repository.EventRepository = repository.NewEventRepository(db)
-
+	userRepository       repository.UserRepository       = repository.NewUserRepository(db)
+	eventRepository      repository.EventRepository      = repository.NewEventRepository(db)
+	attendanceRepository repository.AttendanceRepository = repository.NewAttendanceRepository(db)
 	// 	transactionRepository  repository.TransactionRepository  = repository.NewTransactionRepository(db)
 	// jwtService  service.JWTService  = service.NewJWTService()
-	userService  service.UserService  = service.NewUserService(userRepository)
-	authService  service.AuthService  = service.NewAuthService(userRepository)
-	eventService service.EventService = service.NewEventService(eventRepository)
-	jwtService   service.AuthService  = service.NewAuthService(userRepository)
+	userService       service.UserService       = service.NewUserService(userRepository)
+	authService       service.AuthService       = service.NewAuthService(userRepository)
+	jwtService        service.AuthService       = service.NewAuthService(userRepository)
+	eventService      service.EventService      = service.NewEventService(eventRepository)
+	attendanceService service.AttendanceService = service.NewAttendanceService(attendanceRepository, eventRepository)
 
 	// 	transactionService  service.TransactionService  = service.NewTransactionService(transactionRepository, productRepository)
 
-	authController  controller.AuthController  = controller.NewAuthController(authService)
-	userController  controller.UserController  = controller.NewUserController(userService)
-	eventController controller.EventController = controller.NewEventController(eventService)
+	authController       controller.AuthController       = controller.NewAuthController(authService)
+	userController       controller.UserController       = controller.NewUserController(userService)
+	eventController      controller.EventController      = controller.NewEventController(eventService)
+	attendanceController controller.AttendanceController = controller.NewAttendanceController(attendanceService)
 )
 
 func PingHandler(c *gin.Context) {
@@ -66,8 +68,8 @@ func main() {
 	attendanceRoutes := r.Group("attendances", middleware.AuthorizeJWT(jwtService))
 	{
 		attendanceRoutes.GET("/", PingHandler)
-		attendanceRoutes.GET("/:idEvent", PingHandler)
-		attendanceRoutes.POST("/:idEvent", PingHandler)
+		attendanceRoutes.GET("/:token_event", PingHandler)
+		attendanceRoutes.POST("/:token_event", attendanceController.Attend)
 		attendanceRoutes.DELETE("/:idEvent", PingHandler)
 	}
 	r.GET("ping", PingHandler)
