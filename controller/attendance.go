@@ -26,7 +26,7 @@ func NewAttendanceController(attendanceService service.AttendanceService) Attend
 func (c *attendanceController) Attend(ctx *gin.Context) {
 	var attendance model.Attendance
 
-	UserID := GetUserIdFromClaims(ctx)
+	UserID := helper.GetUserIdFromClaims(ctx)
 
 	if UserID == 0 {
 		response := helper.BuildResponse("User id = 0, there is error occur", helper.EmptyObj{})

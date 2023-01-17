@@ -10,6 +10,8 @@ type Event struct {
 	Date         time.Time `json:"date" gorm:"notNull"`
 	Token        string    `json:"token" gorm:"notNull"`
 	ExpiredToken time.Time `json:"expired_token" gorm:"notNull"`
+	UserID       uint32    `json:"user_id" gorm:"notNull;foreignKey:UserID"` // who created the event
+	User         User      `json:"user"`
 	CreatedAt    time.Time `json:"-"`
 	UpdatedAt    time.Time `json:"-"`
 }

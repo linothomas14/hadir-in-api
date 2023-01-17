@@ -21,10 +21,12 @@ func NewEventRepository(db *gorm.DB) EventRepository {
 }
 
 func (db *eventConnection) CreateEvent(event model.Event) (model.Event, error) {
-	err := db.connection.Save(&event).Error
+
+	err := db.connection.Preload("User").Save(&event).Find(&event).Error
 	if err != nil {
 		return model.Event{}, err
 	}
+
 	return event, err
 }
 

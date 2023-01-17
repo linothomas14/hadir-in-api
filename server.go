@@ -68,7 +68,6 @@ func main() {
 	attendanceRoutes := r.Group("attendances", middleware.AuthorizeJWT(jwtService))
 	{
 		attendanceRoutes.GET("/", PingHandler)
-		attendanceRoutes.GET("/:token_event", PingHandler)
 		attendanceRoutes.POST("/:token_event", attendanceController.Attend)
 		attendanceRoutes.DELETE("/:idEvent", PingHandler)
 	}

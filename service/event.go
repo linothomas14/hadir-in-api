@@ -5,12 +5,13 @@ import (
 
 	"github.com/linothomas14/hadir-in-api/helper"
 	"github.com/linothomas14/hadir-in-api/helper/param"
+	"github.com/linothomas14/hadir-in-api/helper/response"
 	"github.com/linothomas14/hadir-in-api/model"
 	"github.com/linothomas14/hadir-in-api/repository"
 )
 
 type EventService interface {
-	CreateEvent(event param.CreateEvent) (model.Event, error)
+	CreateEvent(event param.CreateEvent, userID uint32) (response.EventRes, error)
 }
 
 type eventService struct {
@@ -23,7 +24,7 @@ func NewEventService(eventRep repository.EventRepository) EventService {
 	}
 }
 
-func (service *eventService) CreateEvent(event param.CreateEvent) (model.Event, error) {
+func (service *eventService) CreateEvent(event param.CreateEvent, userID uint32) (response.EventRes, error) {
 	var eventModel model.Event
 
 	token := helper.TokenGenerator()
@@ -36,15 +37,16 @@ func (service *eventService) CreateEvent(event param.CreateEvent) (model.Event, 
 	date, err := time.Parse(formatTime, event.Date)
 
 	if err != nil {
-		return model.Event{}, err
+		return response.EventRes{}, err
 	}
 
 	expired_token, err := time.Parse(formatTime, event.ExpiredToken)
 
 	if err != nil {
-		return model.Event{}, err
+		return response.EventRes{}, err
 	}
 
+	eventModel.UserID = userID
 	eventModel.Title = event.Title
 	eventModel.Date = date
 	eventModel.Token = token
@@ -53,8 +55,27 @@ func (service *eventService) CreateEvent(event param.CreateEvent) (model.Event, 
 	eventModel, err = service.eventRepository.CreateEvent(eventModel)
 
 	if err != nil {
-		return model.Event{}, err
+		return response.EventRes{}, err
 	}
 
-	return eventModel, err
+	res := ParseEventResponse(eventModel)
+
+	return res, err
+}
+
+func ParseEventResponse(m model.Event) response.EventRes {
+
+	var res response.EventRes
+
+	res.ID = m.ID
+	res.Title = m.Title
+	res.Date = m.Date
+	res.Token = m.Token
+	res.ExpiredToken = m.ExpiredToken
+	res.UserID = m.UserID
+	res.User.ID = m.User.ID
+	res.User.Name = m.User.Name
+	res.User.Email = m.User.Email
+
+	return res
 }

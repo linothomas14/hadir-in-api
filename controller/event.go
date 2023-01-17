@@ -27,6 +27,7 @@ func (c *eventController) CreateEvent(ctx *gin.Context) {
 	var eventParam param.CreateEvent
 
 	err := ctx.ShouldBind(&eventParam)
+	UserID := helper.GetUserIdFromClaims(ctx)
 
 	if err != nil {
 		response := helper.BuildResponse(err.Error(), helper.EmptyObj{})
@@ -42,7 +43,7 @@ func (c *eventController) CreateEvent(ctx *gin.Context) {
 		return
 	}
 
-	event, err := c.eventService.CreateEvent(eventParam)
+	event, err := c.eventService.CreateEvent(eventParam, uint32(UserID))
 
 	if err != nil {
 		response := helper.BuildResponse(err.Error(), helper.EmptyObj{})
