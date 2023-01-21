@@ -26,7 +26,7 @@ var (
 	authService       service.AuthService       = service.NewAuthService(userRepository)
 	jwtService        service.AuthService       = service.NewAuthService(userRepository)
 	eventService      service.EventService      = service.NewEventService(eventRepository)
-	attendanceService service.AttendanceService = service.NewAttendanceService(attendanceRepository, eventRepository)
+	attendanceService service.AttendanceService = service.NewAttendanceService(attendanceRepository, userRepository, eventRepository)
 
 	// 	transactionService  service.TransactionService  = service.NewTransactionService(transactionRepository, productRepository)
 
@@ -68,7 +68,7 @@ func main() {
 	attendanceRoutes := r.Group("attendances", middleware.AuthorizeJWT(jwtService))
 	{
 		attendanceRoutes.GET("/", PingHandler)
-		attendanceRoutes.POST("/:token_event", attendanceController.Attend)
+		attendanceRoutes.POST("/present", attendanceController.Attend)
 		attendanceRoutes.DELETE("/:idEvent", PingHandler)
 	}
 	r.GET("ping", PingHandler)

@@ -22,12 +22,11 @@ func NewAttendanceRepository(db *gorm.DB) AttendanceRepository {
 }
 
 func (db *attendanceConnection) Insert(attendance model.Attendance) (model.Attendance, error) {
-	err := db.connection.Save(&attendance).Error
+	err := db.connection.Preload("User").Preload("Event").Save(&attendance).Find(&attendance).Error
 
 	if err != nil {
 		return model.Attendance{}, err
 	}
-
-	log.Println(attendance)
+	log.Println("user : ", attendance.Event)
 	return attendance, err
 }

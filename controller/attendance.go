@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/linothomas14/hadir-in-api/helper"
+	"github.com/linothomas14/hadir-in-api/helper/response"
 	"github.com/linothomas14/hadir-in-api/model"
 	"github.com/linothomas14/hadir-in-api/service"
 )
@@ -25,6 +26,12 @@ func NewAttendanceController(attendanceService service.AttendanceService) Attend
 
 func (c *attendanceController) Attend(ctx *gin.Context) {
 	var attendance model.Attendance
+	var res response.PresentResponse
+	type PresentParam struct {
+		Token string `json:"token"`
+	}
+
+	var tokenEvent PresentParam
 
 	UserID := helper.GetUserIdFromClaims(ctx)
 
@@ -35,9 +42,8 @@ func (c *attendanceController) Attend(ctx *gin.Context) {
 	}
 
 	attendance.UserID = uint32(UserID)
-	token_event := ctx.Param("token_event")
 
-	attendance, err := c.attendanceService.Attend(attendance, token_event)
+	err := ctx.ShouldBind(&tokenEvent)
 
 	if err != nil {
 		response := helper.BuildResponse(err.Error(), helper.EmptyObj{})
@@ -45,6 +51,14 @@ func (c *attendanceController) Attend(ctx *gin.Context) {
 		return
 	}
 
-	response := helper.BuildResponse("OK", attendance)
+	res, err = c.attendanceService.Attend(attendance, tokenEvent.Token)
+
+	if err != nil {
+		response := helper.BuildResponse(err.Error(), helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.BuildResponse("OK", res)
 	ctx.JSON(http.StatusCreated, response)
 }
